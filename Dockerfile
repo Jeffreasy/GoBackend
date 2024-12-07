@@ -3,7 +3,7 @@
 # Deze Dockerfile bouwt een productiebare build van de Go applicatie. 
 # Eerst wordt een builder stage gebruikt om de binary te bouwen, vervolgens wordt een minimalistische scratch image gebruikt voor runtime.
 
-FROM golang:1.19-alpine as builder
+FROM golang:1.20 as builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
