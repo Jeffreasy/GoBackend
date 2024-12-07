@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -88,8 +89,15 @@ func runMigrations(cfg *configs.Config, db *sql.DB) error {
 		return fmt.Errorf("could not create postgres driver: %w", err)
 	}
 
+	// Gebruik het absolute pad naar de migrations directory
+	migrationPath := "file://migrations"
+	if _, err := os.Stat("migrations"); os.IsNotExist(err) {
+		// Als de migrations directory niet in de root staat, probeer dan het pad relatief aan de binary
+		migrationPath = "file:///app/migrations"
+	}
+
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
+		migrationPath,
 		cfg.DBName,
 		driver,
 	)

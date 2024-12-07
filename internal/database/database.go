@@ -9,8 +9,14 @@ import (
 )
 
 func ConnectPostgres(cfg *configs.Config) (*sql.DB, error) {
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
-		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
+	// In productie willen we SSL gebruiken, maar tijdens development niet
+	sslmode := "require"
+	if cfg.DBHost == "localhost" || cfg.DBHost == "127.0.0.1" || cfg.DBHost == "postgres" {
+		sslmode = "disable"
+	}
+
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName, sslmode)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
