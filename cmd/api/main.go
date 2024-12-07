@@ -104,6 +104,7 @@ func main() {
 func runMigrations(cfg *configs.Config, db *sql.DB) error {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
+		log.Printf("Error creating postgres driver: %v", err)
 		return fmt.Errorf("could not create postgres driver: %w", err)
 	}
 
@@ -111,12 +112,14 @@ func runMigrations(cfg *configs.Config, db *sql.DB) error {
 	wd, _ := os.Getwd()
 	log.Printf("Working directory: %s", wd)
 
+	// List all migration files
 	files, err := os.ReadDir("/app/migrations")
 	if err != nil {
-		log.Printf("Kon /app/migrations niet lezen: %v", err)
+		log.Printf("Error reading migrations directory: %v", err)
 	} else {
+		log.Printf("Found migration files:")
 		for _, f := range files {
-			log.Printf("Found migration file: %s", f.Name())
+			log.Printf("- %s", f.Name())
 		}
 	}
 
@@ -126,11 +129,27 @@ func runMigrations(cfg *configs.Config, db *sql.DB) error {
 		driver,
 	)
 	if err != nil {
+		log.Printf("Error creating migrate instance: %v", err)
 		return fmt.Errorf("could not create migrate instance: %w", err)
 	}
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Printf("Migration error: %v", err)
 		return fmt.Errorf("migration failed: %w", err)
+	}
+
+	// Verify tables exist
+	var tableExists bool
+	err = db.QueryRow(`
+		SELECT EXISTS (
+			SELECT FROM information_schema.tables 
+			WHERE table_name = 'contacts'
+		);
+	`).Scan(&tableExists)
+	if err != nil {
+		log.Printf("Error checking if contacts table exists: %v", err)
+	} else {
+		log.Printf("Contacts table exists: %v", tableExists)
 	}
 
 	log.Println("Migrations completed successfully!")
