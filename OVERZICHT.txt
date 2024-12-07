@@ -1,0 +1,60 @@
+Project Overzicht - DKLBackendGolang
+
+Hier is een overzicht van de bestanden en hun functies binnen je project:
+
+1. **.env**
+   Bevat de omgevingsvariabelen voor je applicatie, zoals database- en SMTP-configuraties.
+
+2. **docker-compose.yml**
+   Definieert de Docker-services, waaronder de PostgreSQL-databasecontainer.
+
+3. **configs/config.go**
+   Laadt de configuratievariabelen uit de omgevingsvariabelen of gebruikt standaardwaarden.
+
+4. **cmd/api/main.go**
+   Startpunt van de applicatie. Hier worden configuraties geladen, databaseverbindingen opgezet, routers en middleware ingesteld.
+
+5. **internal/database/database.go**
+   Behandelt het opzetten van een verbinding met de PostgreSQL-database.
+
+6. **internal/database/postgres.go**
+   (Ongewijzigd bestand)
+
+7. **internal/models/user.go**
+   Definieert het `User` model met velden en validatietags voor validatie.
+
+8. **internal/models/contact.go**
+   Definieert het `Contact` model voor contactberichten met validatietags.
+
+9. **internal/auth/service.go**
+   Bevat de logica voor gebruikersregistratie en authenticatie, inclusief wachtwoord hashing en JWT-generatie.
+
+10. **internal/auth/handler.go**
+    Behandelt HTTP-verzoeken voor registratie en inloggen. Valideert input en roept services aan.
+
+11. **internal/auth/middleware.go**
+    Middleware voor JWT-authenticatie om toegang tot beschermde routes te beheren.
+
+12. **internal/contact/service.go**
+    Behandelt het opslaan van contactformulieren in de database.
+
+13. **internal/contact/handler.go**
+    Verwerkt HTTP-verzoeken om contactberichten op te slaan en e-mailmeldingen te verzenden.
+
+14. **internal/email/service.go**
+    Regelt het versturen van e-mails via SMTP. Kan worden uitgebreid voor HTML-e-mails en bijlagen.
+
+15. **pkg/validator/validator.go**
+    Bevat de validator die gebruikmaakt van de `go-playground/validator` package voor inputvalidatie.
+
+Belangrijke notities:
+
+- **Importpaden aangepast**: De importpaden zijn gecorrigeerd om overeen te komen met de modulenaam `dklbackendGolang` (kleine letters) zoals gedefinieerd in `go.mod`. Dit loste de case-sensitive importproblemen op.
+
+- **Dependencies bijgewerkt**: De ontbrekende dependencies zijn toegevoegd aan `go.mod` en `go.sum` door de juiste `go get` commando's uit te voeren en `go mod tidy` te runnen.
+
+- **Databaseverbinding**: In de `.env` file is `DB_HOST` gewijzigd naar `localhost` om het verbindingsprobleem met de database op te lossen.
+
+- **Starten van de applicatie**: Je kunt de applicatie starten met `go run ./cmd/api/main.go`. Zorg ervoor dat de PostgreSQL-database actief is en toegankelijk op `localhost:5432`.
+
+Als je verdere hulp nodig hebt of vragen hebt over specifieke onderdelen, laat het me gerust weten! 
