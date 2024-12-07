@@ -124,7 +124,7 @@ func runMigrations(cfg *configs.Config, db *sql.DB) error {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
+		"file:///app/migrations",
 		cfg.DBName,
 		driver,
 	)

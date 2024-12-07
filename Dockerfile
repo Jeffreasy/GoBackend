@@ -26,7 +26,7 @@ WORKDIR /app
 
 # Copy binary and migrations
 COPY --from=builder /app/main ./
-COPY --from=builder /app/migrations /app/migrations
+COPY --from=builder /app/migrations/*.sql /app/migrations/
 
 # Debug: List migrations
 RUN ls -la /app/migrations
