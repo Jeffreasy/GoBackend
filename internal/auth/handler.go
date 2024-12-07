@@ -1,17 +1,12 @@
-// handler.go (auth directory)
-
-// De Auth handler regelt de HTTP-logica voor registratie en inloggen.
-// Hier wordt input gevalideerd en worden diensten aangeroepen die de eigenlijke logica uitvoeren.
-
 package auth
 
 import (
 	"encoding/json"
 	"net/http"
 
-	"dklbackendGolang/internal/email"
-	"dklbackendGolang/internal/models"
-	"dklbackendGolang/pkg/validator"
+	"github.com/Jeffreasy/GoBackend/internal/email"
+	"github.com/Jeffreasy/GoBackend/internal/models"
+	"github.com/Jeffreasy/GoBackend/pkg/validator"
 )
 
 type Handler struct {
@@ -35,19 +30,16 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Valideer de user input
 	if err := h.validator.Validate(user); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Registreer de gebruiker via de service
 	if err := h.service.RegisterUser(&user); err != nil {
 		http.Error(w, "Kon gebruiker niet registreren", http.StatusInternalServerError)
 		return
 	}
 
-	// Stuur een bevestigingsmail
 	h.emailService.SendMail(user.Email, "Registratie succesvol", "Bedankt voor je registratie!")
 
 	w.WriteHeader(http.StatusCreated)
@@ -64,7 +56,6 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Vraag de service om een JWT token op basis van email en wachtwoord
 	token, err := h.service.Authenticate(creds.Email, creds.Password)
 	if err != nil {
 		http.Error(w, "Ongeldige inloggegevens", http.StatusUnauthorized)

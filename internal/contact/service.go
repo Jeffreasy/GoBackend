@@ -1,12 +1,9 @@
-// service.go (contact directory)
-
-// De Contact service slaat ontvangen contactformulieren op in de database.
-
 package contact
 
 import (
 	"database/sql"
-	"dklbackendGolang/internal/models"
+
+	"github.com/Jeffreasy/GoBackend/internal/models"
 )
 
 type Service interface {

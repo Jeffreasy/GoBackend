@@ -1,4 +1,3 @@
-// C:\Users\jeffrey\Desktop\DKLBackendGolang\internal\auth\service.go
 package auth
 
 import (
@@ -6,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"dklbackendGolang/configs"
-	"dklbackendGolang/internal/models"
+	"github.com/Jeffreasy/GoBackend/configs"
+	"github.com/Jeffreasy/GoBackend/internal/models"
 
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
@@ -31,7 +30,6 @@ func NewService(db *sql.DB, cfg *configs.Config) Service {
 }
 
 func (s *authService) RegisterUser(user *models.User) error {
-	// Hash wachtwoord
 	hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -55,7 +53,6 @@ func (s *authService) Authenticate(email, password string) (string, error) {
 		return "", errors.New("ongeldige inloggegevens")
 	}
 
-	// JWT genereren
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": id,
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),

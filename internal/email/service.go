@@ -1,15 +1,10 @@
-// service.go (email directory)
-
-// De email service regelt het versturen van emails via SMTP.
-// Je kunt deze logic uitbreiden voor HTML emails, bijlagen, etc.
-
 package email
 
 import (
 	"fmt"
 	"net/smtp"
 
-	"dklbackendGolang/configs"
+	"github.com/Jeffreasy/GoBackend/configs"
 )
 
 type Service interface {
