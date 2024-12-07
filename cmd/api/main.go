@@ -6,6 +6,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -21,6 +22,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	// Migrate imports
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file" // nodig voor "file://migrations"
 )
 
 func main() {
@@ -38,6 +44,11 @@ func main() {
 		log.Fatalf("Kan niet verbinden met de database: %v", err)
 	}
 	defer db.Close()
+
+	// Voer migraties uit voordat de server start
+	if err := runMigrations(cfg, db); err != nil {
+		log.Fatalf("Migrations failed: %v", err)
+	}
 
 	// Initialiseert een validator voor input-validatie van struct velden (email, password, etc.)
 	v := validator.NewValidator()
@@ -76,4 +87,28 @@ func main() {
 	if err := http.ListenAndServe(addr, r); err != nil {
 		log.Fatalf("Server fout: %v", err)
 	}
+}
+
+func runMigrations(cfg *configs.Config, db *sql.DB) error {
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return fmt.Errorf("could not create postgres driver: %w", err)
+	}
+
+	// Zorg dat je "migrations" map op dezelfde niveau staat als je main.go of in de Dockerfile wordt gekopieerd
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://migrations",
+		cfg.DBName,
+		driver,
+	)
+	if err != nil {
+		return fmt.Errorf("could not create migrate instance: %w", err)
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return fmt.Errorf("migration failed: %w", err)
+	}
+
+	log.Println("Migrations completed successfully!")
+	return nil
 }
