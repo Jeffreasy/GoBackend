@@ -99,40 +99,26 @@ func runMigrations(cfg *configs.Config, db *sql.DB) error {
 		return fmt.Errorf("could not create postgres driver: %w", err)
 	}
 
-	// Controleer verschillende mogelijke locaties voor de migraties
-	migrationPaths := []string{
-		"file://migrations",      // Voor lokale development
-		"file:///app/migrations", // Voor Docker container
-		"./migrations",           // Alternatieve lokale path
-		"../migrations",          // Nog een alternatief
+	// Alleen het Docker/Render pad gebruiken
+	migrationPath := "file:///app/migrations"
+
+	m, err := migrate.NewWithDatabaseInstance(
+		migrationPath,
+		cfg.DBName,
+		driver,
+	)
+	if err != nil {
+		return fmt.Errorf("could not create migrate instance: %w", err)
 	}
 
-	var lastErr error
-	for _, path := range migrationPaths {
-		m, err := migrate.NewWithDatabaseInstance(
-			path,
-			cfg.DBName,
-			driver,
-		)
-		if err != nil {
-			lastErr = err
-			log.Printf("Kon migraties niet laden van %s: %v", path, err)
-			continue
+	if err := m.Up(); err != nil {
+		if err == migrate.ErrNoChange {
+			log.Println("No migrations to apply")
+			return nil
 		}
-
-		if err := m.Up(); err != nil {
-			if err == migrate.ErrNoChange {
-				log.Println("No migrations to apply")
-				return nil
-			}
-			lastErr = err
-			log.Printf("Migratie mislukt voor %s: %v", path, err)
-			continue
-		}
-
-		log.Printf("Migraties succesvol uitgevoerd vanaf %s", path)
-		return nil
+		return fmt.Errorf("migration failed: %w", err)
 	}
 
-	return fmt.Errorf("alle migratie pogingen mislukt, laatste fout: %w", lastErr)
+	log.Println("Migrations completed successfully!")
+	return nil
 }
