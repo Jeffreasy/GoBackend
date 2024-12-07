@@ -1,6 +1,8 @@
 module github.com/Jeffreasy/GoBackend
 
-go 1.20
+go 1.22.0
+
+toolchain go1.22.10
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
