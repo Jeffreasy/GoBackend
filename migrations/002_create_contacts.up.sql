@@ -5,6 +5,3 @@ CREATE TABLE IF NOT EXISTS contacts (
     email TEXT NOT NULL,
     message TEXT NOT NULL
 );
-
--- +migrate Down
-DROP TABLE IF EXISTS contacts;
