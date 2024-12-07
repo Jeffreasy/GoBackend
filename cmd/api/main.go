@@ -21,6 +21,7 @@ import (
 	"github.com/Jeffreasy/GoBackend/internal/contact"
 	"github.com/Jeffreasy/GoBackend/internal/database"
 	"github.com/Jeffreasy/GoBackend/internal/email"
+	"github.com/Jeffreasy/GoBackend/internal/registration"
 	"github.com/Jeffreasy/GoBackend/pkg/validator"
 )
 
@@ -59,6 +60,10 @@ func main() {
 	contactService := contact.NewService(db)
 	contactHandler := contact.NewHandler(contactService, v, emailService)
 
+	// Registration service & handler
+	registrationService := registration.NewService(db)
+	registrationHandler := registration.NewHandler(registrationService, v)
+
 	// Router initialiseren
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -68,6 +73,8 @@ func main() {
 	r.Post("/register", authHandler.Register)
 	r.Post("/login", authHandler.Login)
 	r.Post("/contact", contactHandler.SubmitContact)
+	r.Post("/registrations", registrationHandler.CreateRegistration)
+	r.Get("/registrations", registrationHandler.GetRegistrations)
 
 	// Beschermde routes
 	r.Group(func(r chi.Router) {
