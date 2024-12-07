@@ -6,7 +6,13 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file" // nodig voor "file://migrations"
 	"github.com/joho/godotenv"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/Jeffreasy/GoBackend/configs"
 	"github.com/Jeffreasy/GoBackend/internal/auth"
@@ -14,14 +20,6 @@ import (
 	"github.com/Jeffreasy/GoBackend/internal/database"
 	"github.com/Jeffreasy/GoBackend/internal/email"
 	"github.com/Jeffreasy/GoBackend/pkg/validator"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-
-	// Migrate imports
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file" // nodig voor "file://migrations"
 )
 
 func main() {
@@ -91,7 +89,7 @@ func runMigrations(cfg *configs.Config, db *sql.DB) error {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
+		"file:///migrations",
 		cfg.DBName,
 		driver,
 	)
