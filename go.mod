@@ -1,8 +1,6 @@
-module dklbackendGolang
+module github.com/Jeffreasy/GoBackend
 
-go 1.22.0
-
-toolchain go1.23.4
+go 1.20
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
