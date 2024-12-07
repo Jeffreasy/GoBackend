@@ -2,10 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -76,6 +76,16 @@ func main() {
 		})
 	})
 
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		// Check database connectie
+		if err := db.Ping(); err != nil {
+			http.Error(w, "Database unhealthy", http.StatusServiceUnavailable)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
+	})
+
 	addr := fmt.Sprintf(":%s", cfg.ServerPort)
 	log.Printf("Server gestart op %s", addr)
 	if err := http.ListenAndServe(addr, r); err != nil {
@@ -89,26 +99,40 @@ func runMigrations(cfg *configs.Config, db *sql.DB) error {
 		return fmt.Errorf("could not create postgres driver: %w", err)
 	}
 
-	// Gebruik het absolute pad naar de migrations directory
-	migrationPath := "file://migrations"
-	if _, err := os.Stat("migrations"); os.IsNotExist(err) {
-		// Als de migrations directory niet in de root staat, probeer dan het pad relatief aan de binary
-		migrationPath = "file:///app/migrations"
+	// Controleer verschillende mogelijke locaties voor de migraties
+	migrationPaths := []string{
+		"file://migrations",      // Voor lokale development
+		"file:///app/migrations", // Voor Docker container
+		"./migrations",           // Alternatieve lokale path
+		"../migrations",          // Nog een alternatief
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(
-		migrationPath,
-		cfg.DBName,
-		driver,
-	)
-	if err != nil {
-		return fmt.Errorf("could not create migrate instance: %w", err)
+	var lastErr error
+	for _, path := range migrationPaths {
+		m, err := migrate.NewWithDatabaseInstance(
+			path,
+			cfg.DBName,
+			driver,
+		)
+		if err != nil {
+			lastErr = err
+			log.Printf("Kon migraties niet laden van %s: %v", path, err)
+			continue
+		}
+
+		if err := m.Up(); err != nil {
+			if err == migrate.ErrNoChange {
+				log.Println("No migrations to apply")
+				return nil
+			}
+			lastErr = err
+			log.Printf("Migratie mislukt voor %s: %v", path, err)
+			continue
+		}
+
+		log.Printf("Migraties succesvol uitgevoerd vanaf %s", path)
+		return nil
 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return fmt.Errorf("migration failed: %w", err)
-	}
-
-	log.Println("Migrations completed successfully!")
-	return nil
+	return fmt.Errorf("alle migratie pogingen mislukt, laatste fout: %w", lastErr)
 }
