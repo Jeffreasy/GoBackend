@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -99,11 +100,16 @@ func runMigrations(cfg *configs.Config, db *sql.DB) error {
 		return fmt.Errorf("could not create postgres driver: %w", err)
 	}
 
-	// Alleen het Docker/Render pad gebruiken
-	migrationPath := "file:///app/migrations"
+	// Debug: Print working directory and list files
+	wd, _ := os.Getwd()
+	log.Printf("Working directory: %s", wd)
+	files, _ := os.ReadDir("/app/migrations")
+	for _, f := range files {
+		log.Printf("Found migration file: %s", f.Name())
+	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		migrationPath,
+		"file:///app/migrations",
 		cfg.DBName,
 		driver,
 	)

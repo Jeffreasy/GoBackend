@@ -5,43 +5,29 @@ services:
     buildCommand: docker build -t gobackend .
     startCommand: docker run -p $PORT:8080 gobackend
     envVars:
-      # Render zal deze automatisch invullen vanuit de gekoppelde database
+      # Database configuratie wordt automatisch ingesteld door Render
       - key: DB_HOST
         fromDatabase:
-          name: postgres
+          name: DKL2025
           property: host
       - key: DB_NAME
         fromDatabase:
-          name: postgres
+          name: DKL2025
           property: database
       - key: DB_USER
         fromDatabase:
-          name: postgres
+          name: DKL2025
           property: user
       - key: DB_PASSWORD
         fromDatabase:
-          name: postgres
+          name: DKL2025
           property: password
       - key: DB_PORT
         fromDatabase:
-          name: postgres
+          name: DKL2025
           property: port
-      # Overige environment variables die je handmatig moet instellen
-      - key: JWT_SECRET
-        sync: false
-      - key: SMTP_HOST
-        sync: false
-      - key: SMTP_PORT
-        sync: false
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASSWORD
-        sync: false
-      - key: FROM_EMAIL
-        sync: false
 
 databases:
-  - name: postgres
-    databaseName: gobackend
-    plan: free # of een ander plan dat je wilt gebruiken
-    ipAllowList: [] # Laat dit leeg om toegang vanaf alle IPs toe te staan
+  - name: DKL2025
+    databaseName: dekoninklijkeloop2025
+    plan: free

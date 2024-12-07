@@ -24,11 +24,14 @@ RUN apk add --no-cache ca-certificates tzdata
 
 WORKDIR /app
 
-# Copy binary and migration files
+# Copy binary and migrations
 COPY --from=builder /app/main .
-COPY migrations /app/migrations
+COPY --from=builder /app/migrations/*.sql /app/migrations/
 
-# Create a non-root user and set permissions
+# Debug: List migrations
+RUN ls -la /app/migrations
+
+# Create a non-root user
 RUN adduser -D appuser && \
     chown -R appuser:appuser /app
 
