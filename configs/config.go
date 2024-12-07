@@ -1,8 +1,3 @@
-// config.go
-
-// Deze file laadt de configuratievariabelen uit de omgevingsvariabelen (of gebruikt defaults als deze niet gezet zijn).
-// Zo kunnen we eenvoudig wisselen tussen development, staging, en productie omgevingen, zonder code te veranderen.
-
 package configs
 
 import (
@@ -25,7 +20,7 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	return &Config{
+	cfg := &Config{
 		ServerPort:   getEnv("SERVER_PORT", "8080"),
 		DBHost:       getEnv("DB_HOST", "localhost"),
 		DBPort:       getEnv("DB_PORT", "5432"),
@@ -39,10 +34,12 @@ func LoadConfig() *Config {
 		SMTPPassword: getEnv("SMTP_PASSWORD", "emailpassword"),
 		FromEmail:    getEnv("FROM_EMAIL", "no-reply@example.com"),
 	}
+
+	return cfg
 }
 
 func getEnv(key, fallback string) string {
-	if val := os.Getenv(key); val != "" {
+	if val, ok := os.LookupEnv(key); ok {
 		return val
 	}
 	return fallback

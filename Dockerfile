@@ -25,7 +25,7 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 
 # Copy binary and migrations
-COPY --from=builder /app/main .
+COPY --from=builder /app/main ./
 COPY --from=builder /app/migrations/*.sql /app/migrations/
 
 # Debug: List migrations

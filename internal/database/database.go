@@ -13,7 +13,7 @@ func ConnectPostgres(cfg *configs.Config) (*sql.DB, error) {
 	// Bepaal SSL mode op basis van environment
 	sslmode := "require" // Default voor productie (Render)
 
-	// Voor lokale development, gebruik disable
+	// Voor lokale development kan het zijn dat je SSL wilt uitzetten
 	if cfg.DBHost == "localhost" || cfg.DBHost == "127.0.0.1" || cfg.DBHost == "postgres" {
 		sslmode = "disable"
 	}
