@@ -6,7 +6,8 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/api
 
 FROM scratch
-COPY --from=builder /app/main /main
-COPY --from=builder /app/migrations /migrations
+WORKDIR /app
+COPY --from=builder /app/main /app/main
+COPY --from=builder /app/migrations /app/migrations
 EXPOSE 8080
-CMD ["/main"]
+CMD ["./main"]
